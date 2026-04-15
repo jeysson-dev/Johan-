@@ -1,4 +1,2 @@
-# requirements.txt  ─  subir junto a railway_bot.py en Railway
-discord.py==2.3.2
-flask==3.0.3
-requests==2.31.0
+discord.py
+flask
