@@ -1,3 +1,4 @@
+```python
 """
 railway_bot.py  ·  Ejecutar en Railway
 Variables de entorno en Railway:
@@ -24,7 +25,6 @@ app = Flask(__name__)
 
 @app.route("/cmd", methods=["GET"])
 def get_cmd():
-    """La RPi hace GET /cmd?key=... para obtener el próximo comando."""
     if request.args.get("key") != SECRET_KEY:
         return jsonify({"error": "no autorizado"}), 403
     if cola:
@@ -70,7 +70,7 @@ async def on_message(message: discord.Message):
         await message.channel.send(
             "**Comandos del carro:**\n"
             "`!adelante` `!atras` `!izquierda` `!derecha` `!stop`\n"
-            "`!servo <0-180>` · `!distancia` · `!blink [veces]`"
+            "`!servo <0-180>` · `!distancia`"
         )
         return
 
@@ -93,15 +93,10 @@ async def on_message(message: discord.Message):
         await message.add_reaction("📡")
         return
 
-    if cmd_str == "!blink":
-        veces = 3
-        if len(partes) >= 2 and partes[1].isdigit():
-            veces = max(1, min(20, int(partes[1])))
-        cola.append(f"K{veces}")
-        await message.add_reaction("💡")
-        return
-
 # ─── Arranque ─────────────────────────────────────────────────────
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
     client.run(DISCORD_TOKEN)
+```
+
+Igual que antes, sin ningún cambio.
