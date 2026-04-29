@@ -5,11 +5,9 @@ Variables de entorno en Railway:
   CANAL_ID        → ID del canal (número)
   SECRET_KEY      → clave compartida con la RPi (cualquier string)
 """
-
 import os
 import threading
 from collections import deque
-
 import discord
 from flask import Flask, jsonify, request
 
@@ -72,7 +70,7 @@ async def on_message(message: discord.Message):
         await message.channel.send(
             "**Comandos del carro:**\n"
             "`!adelante` `!atras` `!izquierda` `!derecha` `!stop`\n"
-            "`!servo <0-180>` · `!distancia`"
+            "`!servo <0-180>` · `!distancia` · `!blink [veces]`"
         )
         return
 
@@ -93,6 +91,14 @@ async def on_message(message: discord.Message):
     if cmd_str == "!distancia":
         cola.append("D")
         await message.add_reaction("📡")
+        return
+
+    if cmd_str == "!blink":
+        veces = 3
+        if len(partes) >= 2 and partes[1].isdigit():
+            veces = max(1, min(20, int(partes[1])))
+        cola.append(f"K{veces}")
+        await message.add_reaction("💡")
         return
 
 # ─── Arranque ─────────────────────────────────────────────────────
