@@ -1,4 +1,3 @@
-```python
 """
 railway_bot.py  ·  Ejecutar en Railway
 Variables de entorno en Railway:
@@ -8,6 +7,7 @@ Variables de entorno en Railway:
 """
 import os
 import threading
+import asyncio
 from collections import deque
 import discord
 from flask import Flask, jsonify, request
@@ -31,6 +31,20 @@ def get_cmd():
         return jsonify({"cmd": cola.popleft()})
     return jsonify({"cmd": None})
 
+@app.route("/respuesta", methods=["POST"])
+def post_respuesta():
+    """La RPi envía datos de vuelta (ej: distancia)."""
+    if request.args.get("key") != SECRET_KEY:
+        return jsonify({"error": "no autorizado"}), 403
+    data = request.json
+    mensaje = data.get("mensaje", "")
+    if mensaje and canal_discord:
+        asyncio.run_coroutine_threadsafe(
+            canal_discord.send(mensaje),
+            loop_discord
+        )
+    return jsonify({"ok": True})
+
 @app.route("/health")
 def health():
     return "ok", 200
@@ -44,6 +58,9 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 
+canal_discord = None
+loop_discord  = None
+
 COMANDOS_VALIDOS = {
     "!adelante":  "F",
     "!atras":     "B",
@@ -54,6 +71,9 @@ COMANDOS_VALIDOS = {
 
 @client.event
 async def on_ready():
+    global canal_discord, loop_discord
+    canal_discord = client.get_channel(CANAL_ID)
+    loop_discord  = asyncio.get_event_loop()
     print(f"[Bot] Conectado como {client.user}")
 
 @client.event
@@ -97,5 +117,3 @@ async def on_message(message: discord.Message):
 if __name__ == "__main__":
     threading.Thread(target=run_flask, daemon=True).start()
     client.run(DISCORD_TOKEN)
-```
-
